@@ -1,0 +1,10 @@
+name: project_environment
+dependencies:
+  - python=3.9
+  - opencv
+  - flask
+  - numpy
+  - scikit-image
+  - pip
+  - pip:
+    - opencv-python

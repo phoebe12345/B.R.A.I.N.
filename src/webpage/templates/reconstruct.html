@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Medical Image Reconstruction with Corner Selection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; 
+            background-color: #d1e7dd;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background-color: #1f7d7e;
+            color: white;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            height: 50px;
+            line-height: 50px;
+            margin-top: auto;
+        }
+
+        h1 {
+            color: #1f7d7e;
+        }
+
+        .btn-upload-process {
+            font-size: 1.3em; 
+            padding: 12px 25px; 
+            width: 50%; 
+            margin: 20px auto; 
+            display: block;
+        }
+
+        .video-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            border: 2px solid #1f7d7e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 0;
+            margin: 20px auto;
+        }
+
+        #frameContainer {
+            display: none;
+            position: relative;
+            width: 100%;
+        }
+
+        #selectionCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: auto;
+        }
+
+        .btn-secondary:hover {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        .navigation a {
+            flex-grow: 1; /* button stretching here */
+            margin: 0 5px; /* spacing ehre */
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="text-white px-4 py-3">
+        <div class="logo text-center">
+            <a href="/" class="text-white text-decoration-none">3D Medical Image Analysis (B.R.A.I.N.)</a>
+        </div>
+        <nav class="d-flex justify-content-center navigation">
+            <a href="/" class="btn btn-light text-center">Home</a>
+            <a href="/about_us" class="btn btn-light text-center">About Us</a>
+            <a href="https://invest-med.ca/tests/mri/?gad_source=1&gclid=EAIaIQobChMIiMfg8qTliQMViShECB16rDFJEAAYAyAAEgIjivD_BwE" 
+               target="_blank" 
+               class="btn btn-light text-center">What is an MRI?</a>
+            <a href="/contact_us" class="btn btn-light text-center">Contact Us</a>
+        </nav>
+    </header>
+
+    <!-- Main  -->
+    <div class="container mt-5">
+        <h1 class="text-center">Upload Video and Select 4 Corners</h1>
+
+        <!-- Upload Form -->
+        <form id="uploadForm" enctype="multipart/form-data" class="text-center">
+            <input type="file" name="file" accept="video/*" required class="form-control mb-3 w-50 mx-auto">
+            <button type="submit" class="btn btn-secondary btn-upload-process">Upload and Process</button>
+        </form>
+
+        <!-- Video Container -->
+        <div class="video-box">
+            <div id="frameContainer">
+                <img id="frameImage" alt="First frame">
+                <canvas id="selectionCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Process Button -->
+        <div class="d-flex justify-content-center">
+            <button id="processButton" style="display: none;" class="btn btn-primary mt-3">Process Video</button>
+        </div>
+
+        <div id="downloadContainer" class="text-center mt-4"></div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loadingModalLabel">Processing Your Video</h5>
+                </div>
+                <div class="modal-body">
+                    <p id="loadingMessage">We want to make sure we're doing a really good job, please be patient.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy;2024 CMPT 340 | Developed by the B.R.A.I.N Team.</p>
+    </footer>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const frameContainer = document.getElementById('frameContainer');
+        const frameImage = document.getElementById('frameImage');
+        const canvas = document.getElementById('selectionCanvas');
+        const ctx = canvas.getContext('2d');
+        const processButton = document.getElementById('processButton');
+        const downloadContainer = document.getElementById('downloadContainer');
+        let points = [];
+        const messages = [
+            "We want to make sure we're doing a reeeeaaaally good job, so please be patient.",
+            "Hang on while we get that model for you!",
+            "going through this video is a loooooooot of work! but we're almost there!",
+            "Good things take time, and so does great 3D!",
+            "Piecing things together – thanks for sticking with us!",
+            "Getting everything in place – this takes a little time!",
+            "Dogs can’t operate MRI machines, but cats can.",
+            "I would share my MRI jokes with you, but they are too polarizing.",
+            "We're a little short-staffed at the moment, thank you for your patience.",
+            "'Some people contribute with their silence more than with their words.'\n-Ryan Lilly",
+            "Almost there, thank you for waiting!",
+            "Fun Fact: MRI machines are calibrated in Tesla units!",
+            "Hold tight! We’re aligning all the pixels.",
+            "Good things come to those who wait... briefly!",
+            "Hold on, we’re connecting the dots!",
+            "Sit back, relax, and let us do the work.",
+            "Fixing bugs... or creating new ones—stay tuned!",
+            "Hang tight! The entire team (two people) is on it.",
+            "Hold tight... one of us is processing the video, and the other is watching it.",
+            "After we finish processing, we're gonna go take a nap"
+        ];
+        let messageInterval;
+
+        function showLoadingModal() {
+            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            loadingModal.show();
+
+            const loadingMessage = document.getElementById('loadingMessage');
+            messageInterval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * messages.length);
+                loadingMessage.textContent = messages[randomIndex];
+            }, 8000);
+        }
+
+        function hideLoadingModal() {
+            clearInterval(messageInterval);
+            const loadingModal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+            if (loadingModal) loadingModal.hide();
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(uploadForm);
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            const result = await response.json();
+            if (response.ok) {
+                frameContainer.style.display = 'block';
+                frameImage.src = result.frame_path; 
+            } else {
+                alert(result.error);
+            }
+        });
+
+        frameImage.onload = () => {
+            canvas.width = frameImage.width;
+            canvas.height = frameImage.height;
+            canvas.style.pointerEvents = 'auto';
+        };
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (frameImage.naturalWidth / frameImage.width);
+            const y = (e.clientY - rect.top) * (frameImage.naturalHeight / frameImage.height);
+
+            if (points.length < 4) {
+                points.push({ x, y });
+                ctx.fillStyle = 'red';
+                ctx.beginPath();
+                ctx.arc(e.offsetX, e.offsetY, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+
+            if (points.length === 4) {
+                processButton.style.display = 'block';
+            }
+        });
+
+        processButton.addEventListener('click', async () => {
+            showLoadingModal();
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ points })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('3D Model generated successfully!');
+                } else {
+                    alert('There was an error generating the 3D model, please refresh and try again');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+            } finally {
+                hideLoadingModal();
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

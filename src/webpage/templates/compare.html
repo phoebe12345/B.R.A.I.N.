@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Medical Image Reconstruction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body {
+            background-color: #d1e7dd;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background-color: #1f7d7e;
+            color: white;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            height: 50px;
+            line-height: 50px;
+            margin-top: auto;
+        }
+
+        footer a {
+            color: white;
+        }
+
+        footer a:hover {
+            color: #28a745;
+            text-decoration: underline;
+        }
+
+        .container {
+            flex: 1;
+            padding-bottom: 20px;
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto;
+        }
+
+        .video-frame {
+            position: relative;
+            display: inline-block;
+        }
+
+        .video-frame img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .btn-upload-process {
+            font-size: 1.3em;
+            padding: 12px 25px;
+            width: 50%;
+            margin: 20px auto;
+            display: block;
+        }
+
+        .navigation a {
+            flex-grow: 1;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="text-white px-4 py-3">
+        <div class="logo text-center">
+            <a href="/" class="text-white text-decoration-none">3D Medical Image Analysis (B.R.A.I.N.)</a>
+        </div>
+        <nav class="d-flex justify-content-center navigation">
+            <a href="/" class="btn btn-light text-center highlight ed">Home</a>
+            <a href="/about_us" class="btn btn-light text-center">About Us</a>
+            <a href="https://invest-med.ca/tests/mri/?gad_source=1&gclid=EAIaIQobChMIiMfg8qTliQMViShECB16rDFJEAAYAyAAEgIjivD_BwE" 
+               target="_blank" 
+               class="btn btn-light text-center">What is an MRI?</a>
+            <a href="/contact_us" class="btn btn-light text-center">Contact Us</a>
+        </nav>
+    </header>
+
+    <div class="container mt-5">
+        <h1 class="text-center">Upload and Select Points for Both Videos</h1>
+        <form id="upload-form" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file1" class="form-label">Upload Video 1:</label>
+                <input type="file" name="file1" id="file1" accept="video/*" required class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="file2" class="form-label">Upload Video 2:</label>
+                <input type="file" name="file2" id="file2" accept="video/*" required class="form-control">
+            </div>
+            <button type="button" id="upload-btn" class="btn btn-secondary btn-upload-process">Upload Videos</button>
+        </form>
+
+        <div id="video-selection" style="display: none; text-align: center;">
+            <h3>Select 4 Points for Video 1</h3>
+            <div class="video-container">
+                <div class="video-frame">
+                    <img id="video1-frame" alt="Video 1 Frame">
+                    <canvas id="canvas1"></canvas>
+                </div>
+            </div>
+            <h3>Select 4 Points for Video 2</h3>
+            <div class="video-container">
+                <div class="video-frame">
+                    <img id="video2-frame" alt="Video 2 Frame">
+                    <canvas id="canvas2"></canvas>
+                </div>
+            </div>
+            <button type="button" id="process-btn" class="btn btn-secondary btn-upload-process" style="display: none;">Process Videos</button>
+        </div>
+
+        <button type="button" id="construct-btn" class="btn btn-primary btn-upload-process" style="display: none;">Generate 3D Model</button>
+
+        <div id="status-container" class="text-center mt-4" style="display: none;">
+            <h2>Processing Status</h2>
+            <p id="status-message"></p>
+        </div>
+    </div>
+        <!-- Loading Modal -->
+        <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loadingModalLabel">Processing Your Video</h5>
+                    </div>
+                        <div class="modal-body">
+                            <p id="loadingMessage">We want to make sure we're doing a really good job, please be patient.</p>
+                        </div>
+                </div>
+            </div>
+        </div>
+
+    <footer>
+        <p>&copy; 2024 CMPT 340 | Developed by the B.R.A.I.N Team.</p>
+    </footer>
+
+    <script>
+        const uploadBtn = document.getElementById('upload-btn');
+        const processBtn = document.getElementById('process-btn');
+        const constructBtn = document.getElementById('construct-btn');
+        const videoSelection = document.getElementById('video-selection');
+        const video1Frame = document.getElementById('video1-frame');
+        const video2Frame = document.getElementById('video2-frame');
+        const canvas1 = document.getElementById('canvas1');
+        const canvas2 = document.getElementById('canvas2');
+        const ctx1 = canvas1.getContext('2d');
+        const ctx2 = canvas2.getContext('2d');
+        const points1 = [];
+        const points2 = [];
+        let messageInterval
+        const onesec = ["please press 'Generate 3D Model' after processing :D"];
+        const messages = [
+            "Fun Fact: Radiation therapy became a specialized field in 1964!",
+            "Thank you for your patience!",
+            "Fun Fact: The first MR scan of the human body was performed in 1977",
+            "Did You Know: Medical imaging is a noninvasive and painless way to monitor, diagnose, and treat injuries and diseases.",
+            "'Some people contribute with their silence more than with their words.'\n-Ryan Lilly",,
+            "Great things take time, and precision builds perfection. Hang tight while we work our magic!",
+            "This part takes a minute, please do not close this tab",
+            "Fun Fact: The MRI is 49 years old!",
+            "Crunching numbers and making magic happen...",
+            "Loading... we’re duct-taping some logic together!",
+            "get ready to be mind blown",
+            "we're working on it! promise!",
+            "Fun Fsct: Movies typically run at 24 frames per second (fps), but high-quality videos like 4K or slow-motion videos can go up to 120 fps or more!",
+            "The SSIM (Structural Similarity Index), used in our project, mimics how the human brain perceives image differences.",
+            "3D video reconstruction is used in crime scene investigations to recreate events in virtual reality.",
+            "The first webcam monitored... a coffee pot in 1993.",
+            "The first YouTube video was 'Me at the Zoo' in 2005."
+        ];
+        function showLoadingModal() {
+            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            loadingModal.show();
+
+            const loadingMessage = document.getElementById('loadingMessage');
+            messageInterval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * messages.length);
+                loadingMessage.textContent = messages[randomIndex];
+            }, 10000);
+        }
+
+        function hideLoadingModal() {
+            clearInterval(messageInterval);
+            const loadingModal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+            if (loadingModal) loadingModal.hide();
+        }
+
+        function showLoadingModal2() {
+            const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            loadingModal.show();
+
+            const loadingMessage = document.getElementById('loadingMessage');
+            messageInterval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * onesec.length);
+                loadingMessage.textContent = onesec[randomIndex];
+            }, 10000);
+        }
+
+        function hideLoadingModal2() {
+            clearInterval(messageInterval);
+            const loadingModal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+            if (loadingModal) loadingModal.hide();
+        }
+        
+        uploadBtn.addEventListener('click', async () => {
+            const fileInput1 = document.getElementById('file1');
+            const fileInput2 = document.getElementById('file2');
+
+            if (fileInput1.files.length === 0 || fileInput2.files.length === 0) {
+                alert('Please upload both videos!');
+                return;
+            }
+
+            const formData1 = new FormData();
+            formData1.append('file', fileInput1.files[0]);
+
+            const formData2 = new FormData();
+            formData2.append('file', fileInput2.files[0]);
+
+            try {
+                const response1 = await fetch('/uploadone', { method: 'POST', body: formData1 });
+                const result1 = await response1.json();
+
+                const response2 = await fetch('/uploadtwo', { method: 'POST', body: formData2 });
+                const result2 = await response2.json();
+
+                if (response1.ok && response2.ok) {
+                    video1Frame.src = result1.frame_path;
+                    video2Frame.src = result2.frame_path;
+
+                    video1Frame.onload = () => setupCanvas(video1Frame, canvas1, ctx1, points1);
+                    video2Frame.onload = () => setupCanvas(video2Frame, canvas2, ctx2, points2);
+
+                    videoSelection.style.display = 'block';
+                } else {
+                    alert('Error uploading videos.');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error during upload.');
+            }
+        });
+
+        function setupCanvas(image, canvas, ctx, points) {
+            canvas.width = image.width;
+            canvas.height = image.height;
+            canvas.style.pointerEvents = 'auto';
+
+            canvas.addEventListener('click', (e) => {
+                if (points.length < 4) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) * (image.naturalWidth / image.width);
+                    const y = (e.clientY - rect.top) * (image.naturalHeight / image.height);
+
+                    points.push({ x, y });
+                    ctx.fillStyle = 'red';
+                    ctx.beginPath();
+                    ctx.arc(e.offsetX, e.offsetY, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+
+                    if (points.length === 4) {
+                        checkAllPointsSelected();
+                    }
+                }
+            });
+        }
+
+        function checkAllPointsSelected() {
+            if (points1.length === 4 && points2.length === 4) {
+                processBtn.style.display = 'block';
+            }
+        }
+
+        processBtn.addEventListener('click', async () => {
+            showLoadingModal();
+
+            try {
+                const response1 = await fetch('/processone', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ points: points1 })
+                });
+
+                const response2 = await fetch('/processtwo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ points: points2 })
+                });
+
+                if (response1.ok && response2.ok) {
+                    hideLoadingModal();
+
+                    alert("Please Scroll Down And Click 'Generate 3D Model'!");
+                    constructBtn.style.display = 'block'; 
+                } else {
+                    hideLoadingModal();
+                    alert('Error processing videos.');
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert('Error during processing.');
+            }
+        });
+
+        constructBtn.addEventListener('click', async () => {
+            showLoadingModal();
+            try {
+                const response = await fetch('/constructmodel', {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('3D Model generated successfully!');
+                } else {
+                    alert('There was an error generating the 3D model, please refresh and try again');
+
+                }
+            } catch (error) {
+                console.error('Error', error);
+                alert('An unexpected error occured.');
+            } finally{
+                hideLoadingModal();
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

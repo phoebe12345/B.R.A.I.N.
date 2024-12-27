@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Medical Imaging Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #d1e7dd;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background-color: #1f7d7e;
+            color: white;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            height: 50px; 
+            line-height: 50px; 
+            margin-top: auto; 
+        }
+
+        footer a {
+            color: white;
+        }
+
+        footer a:hover {
+            color: #28a745;
+            text-decoration: underline;
+        }
+
+        h2 {
+            color: #1f7d7e;
+            margin-top: 50px;
+        }
+
+        .email-link {
+            color: #1f7d7e;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .email-link:hover {
+            color: #28a745;
+            text-decoration: underline;
+        }
+
+        .thank-you-image {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .container {
+            flex: 1; 
+            padding-bottom: 20px; 
+        }
+
+        .navigation a {
+            flex-grow: 1; 
+            margin: 0 5px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="text-white px-4 py-3">
+        <div class="logo text-center">
+            <a href="/" class="text-white text-decoration-none">3D Medical Image Analysis (B.R.A.I.N.)</a>
+
+        </div>
+        <nav class="d-flex justify-content-center navigation">
+            <a href="/" class="btn btn-light text-center">Home</a>
+            <a href="/about_us" class="btn btn-light text-center">About Us</a>
+            <a href="https://invest-med.ca/tests/mri/?gad_source=1&gclid=EAIaIQobChMIiMfg8qTliQMViShECB16rDFJEAAYAyAAEgIjivD_BwE" 
+               target="_blank" 
+               class="btn btn-light text-center">What is an MRI?</a>
+            <a href="/contact_us" class="btn btn-light text-center">Contact Us</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container text-center">
+        <h2>Contact Us</h2>
+        <p class="mt-4">
+            This is a student-made project designed to explore innovative applications in medical imaging.
+            If something went wrong or if you have any questions, please don't hesitate to reach out to us at the following email:
+        </p>
+        <p class="mt-3">
+            <a href="mailto:abc@sfu.ca" class="email-link">xha91@sfu.ca</a>
+
+        </p>
+        <p class="mt-4">Thank you for supporting our project!</p>
+        <img src="{{ url_for('static', filename='images/thankyou.png') }}" alt="Thank You" class="thank-you-image">
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy;2024 CMPT 340 | Developed by the B.R.A.I.N Team.</p>
+
+    </footer>
+</body>
+</html>

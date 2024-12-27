@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MRI Tester Application Overview</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; 
+            background-color: #d1e7dd;
+            font-family: Arial, sans-serif;
+        }
+        .section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; 
+            padding: 50px 0;
+            margin-top: 20px;
+            position: relative;
+            margin-bottom: 80px;
+            margin-right: 80px;
+        }
+        .section .text {
+            flex: 1;
+            padding-right:10px; 
+            max-width: 50%;
+            margin-left: 70px;
+        }
+
+        .section .text h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1f7d7e;
+            margin-bottom: 20px;
+            margin-left: 10px;
+        }
+
+        .section .text p {
+            font-size: 1.1rem;
+            margin-left:10px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .section .images {
+            position: relative;
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            height: 100%;
+            
+            margin-bottom: 50px;
+        }
+        .section .images img {
+            position: absolute;
+            width: 350px; 
+            transition: transform 0.3s ease, top 0.3s ease, left 0.3s ease;
+        }
+
+        .section .images img:nth-child(1) {
+            top: -30px;   
+            left: 150px;  
+            transform: rotate(-10deg);
+        }
+        .section .images img:nth-child(2) {
+            top: 20px;  
+            left: 220px;  
+            transform: rotate(8deg);
+        }
+        .section .images img:nth-child(3) {
+            top: 40px;    
+            left: 300px;  
+            transform: rotate(-5deg);
+        }
+        .section .images img:hover {
+            transform: scale(1.1) rotate(0deg);
+        }
+
+
+        header {
+            background-color: #1f7d7e;
+            color: white;
+        }
+
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            height: 50px;
+            line-height: 50px; 
+            margin-top: auto; 
+        }
+
+        footer a {
+            color: white;
+        }
+
+        footer a:hover {
+            color: #28a745;
+            text-decoration: underline;
+        }
+
+        h2 {
+            color: #1f7d7e;
+        }
+
+        .card {
+            background-color: white;  
+            border: 1px solid #ccc;   
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            min-height: 200px;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .btn-secondary:hover {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .container {
+            flex: 1;
+            padding-bottom: 20px; 
+        }
+
+        .navigation a {
+            flex-grow: 1; 
+            margin: 0 5px; 
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+       
+        .highlighted {
+            background-color: rgb(207, 207, 207);
+            color: black; 
+            border: 2px solid #1f7d7e; 
+        }
+
+        .highlighted:hover {
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <header class="text-white px-4 py-3">
+        <div class="logo text-center">
+            <a href="/" class="text-white text-decoration-none">3D Medical Image Analysis (B.R.A.I.N.)</a>
+
+        </div>
+        <nav class="d-flex justify-content-center navigation">
+            <a href="/" class="btn btn-light text-center highlight ed">Home</a>
+            <a href="/about_us" class="btn btn-light text-center">About Us</a>
+            <a href="https://invest-med.ca/tests/mri/?gad_source=1&gclid=EAIaIQobChMIiMfg8qTliQMViShECB16rDFJEAAYAyAAEgIjivD_BwE" 
+               target="_blank" 
+               class="btn btn-light text-center">What is an MRI?</a>
+            <a href="/contact_us" class="btn btn-light text-center">Contact Us</a>
+        </nav>
+    </header>
+
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <h2 class="text-center">B.R.A.I.N. Application Overview</h2>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm border-light">
+                    <img src="static/images/3d.jpg" class="card-img-top" alt="Video Upload for 3D Reconstruction">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Upload Video for 3D Construction</h5>
+                        <p class="card-text">Click here to analyse your video!</p>
+                        <a href="/reconstruct" class="btn btn-secondary stretched-link">Go to Page</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm border-light">
+                    <img src="static/images/compare.jpg" class="card-img-top" alt="Compare Two 3D Volumes">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Compare Two 3D Medical Volumes</h5>
+                        <p class="card-text">Click here to find what has changed!</p>
+                        <a href="/compare" class="btn btn-secondary stretched-link">Go to Page</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="text">
+            <h2>What is B.R.A.I.N</h2>
+            <p>B.R.A.I.N stands for Building Reconstructed Anatomical Images for Navigation and is an application that allows 
+                you to upload a video captured on your mobile device and effortlessly visualize a 3D model while comparing 
+                significant differences. It is designed to assist clinicians and researchers in creating 3D models of the brain, 
+                offering valuable insights for those in the field. Let's dive in and explore how this app enhances data 
+                visualization with exceptional clarity and precision.
+            </p>
+        </div>
+        <div class="images">
+
+            <img src="static/images/pic1.png" alt="MRI Image 1">
+            <img src="static/images/pic2.jpg" alt="MRI Image 2">
+            <img src="static/images/pic3.jpg" alt="MRI Image 3">
+        </div>
+    </div>
+
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy;2024 CMPT 340 | Developed by the B.R.A.I.N Team.</p>
+    </footer>
+</body>
+</html>
