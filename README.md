@@ -1,14 +1,8 @@
-# SFU CMPT 340 Project -- Building Reconstructed Anatomical Images for Navigation (B.R.A.I.N)
+#Building Reconstructed Anatomical Images for Navigation (B.R.A.I.N)
 Building Reconstructed Anatomical Images for Navigation or B.R.A.I.N. for short.
 
 This project focuses on reconstructing 3D volumetric data from medical imaging videos captured on mobile devices, making scans more accessible and easier to understand. The system detects regions of interest, resolves duplication and misalignment, and generates detailed 3D models for personal analysis and interpretation.
 
-## Group Members
-- Phoebe (Xu) Han
-- Elysa Lin
-- Yuqi Jia
-- Pritpal Bhamra
-- Shahmat Uzaer Reza Nafee
 ## Important Links
 
 [Slack channel](https://app.slack.com/client/T07K7SWL5A4/C07JBHF7YEB) | [Project report](https://www.overleaf.com/project/66d0b12af2a4e69028245551)|[Timesheet](https://1sfu-my.sharepoint.com/:x:/g/personal/hamarneh_sfu_ca/ES9rdP1pAQhNpuuQFAzPTjgBSXuUPkfirF2sOHpqJiUc1Q?e=dtvp0R) |
